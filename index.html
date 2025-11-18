@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生物图鉴投稿</title>
+    <style>
+        /* 通用 */
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Microsoft YaHei',Arial,sans-serif;background:#f8f9fa;color:#333}
+
+        /* ===== 1. 主页背景：白底 + 淡绿藤蔓花纹 ===== */
+        .hero-section{
+            position:relative;
+            background:#ffffff;                          /* 纯白底色 */
+            background-image:url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 80c20-10 25-30 45-25s25 25 45 15 25-30 45-25 25 25 45 15' stroke='%235cb85c' stroke-width='1.5' fill='none' opacity='.08'/%3E%3C/svg%3E");
+            background-repeat:repeat;
+            color:#2e7d32;                               /* 文字深绿 */
+            padding:80px 20px;text-align:center;overflow:hidden;
+        }
+        .hero-section h1{color:#1b5e20; font-size: 2.5rem; margin-bottom: 15px;}
+        .hero-section p{color:#388e3c; font-size: 1.2rem; margin-bottom: 30px;}
+        .hero-section::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 Q50,20 100,0 L100,100 Q50,80 0,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');background-size:cover;opacity:.3}
+
+        .video-container{max-width:800px;margin:0 auto 40px;background:rgba(46,125,50,.05);border-radius:15px;padding:20px;border:1px solid rgba(46,125,50,.1)}
+        .video-placeholder{background:rgba(0,0,0,.05);height:450px;display:flex;align-items:center;justify-content:center;color:#2e7d32;font-size:1.5em;border-radius:10px;border:2px dashed rgba(46,125,50,.2)}
+
+        /* ===== 2. 投稿按钮：深绿色 ===== */
+        .cta-button{background:#2e7d32;color:#fff;padding:15px 40px;font-size:1.2em;border:none;border-radius:50px;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(0,0,0,.2);font-weight:bold}
+        .cta-button:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.25);background:#1b5e20}
+
+        /* 导航栏 */
+        .nav-bar{width:100%;background:#2e7d32;display:flex;justify-content:center;gap:40px;padding:14px 0;position:sticky;top:0;z-index:100}
+        .nav-bar button{background:none;border:none;color:#fff;font-size:17px;cursor:pointer;padding:6px 16px;border-radius:20px;transition:background .3s}
+        .nav-bar button:hover,.nav-bar button.active{background:rgba(255,255,255,.25)}
+
+        /* 展示区 */
+        .showcase-section{padding:60px 20px;max-width:1200px;margin:0 auto}
+        .showcase-section h2{text-align:center;font-size:2em;margin-bottom:40px;color:#2e7d32;position:relative}
+        .showcase-section h2::after{content:"";display:block;width:80px;height:4px;background:#ff9800;margin:10px auto 0;border-radius:2px}
+        .showcase-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px}
+        .showcase-item{background:#fff;border-radius:15px;overflow:hidden;box-shadow:0 5px 15px rgba(0,0,0,.05);transition:all .3s;border:1px solid #e0e0e0}
+        .showcase-item:hover{transform:translateY(-8px);box-shadow:0 8px 25px rgba(0,0,0,.1)}
+        .showcase-item img{width:100%;height:200px;object-fit:cover}
+        .showcase-content{padding:20px}
+        .showcase-content h3{color:#2e7d32;margin-bottom:10px}
+        .showcase-content p{color:#666;line-height:1.6}
+        .showcase-author{color:#ff9800;font-weight:bold;margin-top:10px;display:block}
+
+        /* 投稿表单 */
+        .form-section{display:none;padding:40px 20px;max-width:600px;margin:0 auto}
+        .form-container{background:#fff;padding:40px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,.05);border:1px solid #e0e0e0}
+        .form-container h2{text-align:center;margin-bottom:30px;color:#2e7d32;font-size:2em}
+        .form-group{margin-bottom:25px}
+        .form-group label{display:block;margin-bottom:8px;font-weight:bold;color:#555}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;transition:all .3s;background:#fafafa}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#2e7d32;background:#fff;box-shadow:0 0 0 3px rgba(46,125,50,.1)}
+        .form-group textarea{min-height:120px;resize:vertical}
+        .file-upload{position:relative;display:inline-block;cursor:pointer;width:100%}
+        .file-upload input[type=file]{position:absolute;opacity:0;width:100%;height:100%}
+        .file-upload-label{display:block;padding:15px;background:#f5f5f5;border:2px dashed #c8e6c9;border-radius:8px;text-align:center;transition:all .3s;color:#2e7d32}
+        .file-upload:hover .file-upload-label{background:#e8f5e9;border-color:#2e7d32}
+        .submit-button{width:100%;padding:15px;background:#2e7d32;color:#fff;border:none;border-radius:8px;font-size:18px;cursor:pointer;transition:all .3s;font-weight:bold;letter-spacing:1px;margin-top:10px}
+        .submit-button:hover{background:#1b5e20;transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.1)}
+        .back-button{background:#78909c;margin-top:15px}
+        .back-button:hover{background:#546e7a}
+
+        /* BIEC 图鉴页 */
+        .page{display:none}
+        .page.active{display:block}
+        #biec-gallery img{width:100%;max-width:500px;display:block;margin:15px auto;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.12);cursor:pointer}
+        .empty-tip{text-align:center;color:#888;margin-top:40px}
+        
+        /* 加载指示器 */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2e7d32;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== 导航栏 ===== -->
+<div class="nav-bar">
+    <button onclick="showPage('home')" id="nav-home" class="active">首页</button>
+    <button onclick="showPage('submit')" id="nav-submit">投稿</button>
+    <button onclick="showPage('biec')" id="nav-biec">BIEC生物图鉴</button>
+</div>
+
+<!-- ===== 1. 首页 ===== -->
+<div id="home" class="page active">
+    <div class="hero-section">
+        <h1>探索生物世界 · 分享你的发现</h1>
+        <p>记录大自然的美好瞬间，共建生物多样性图鉴</p>
+        <div class="video-container">
+            <div class="video-placeholder">[活动宣传片占位区]</div>
+        </div>
+        <button class="cta-button" onclick="showPage('submit')">立即投稿</button>
+    </div>
+
+    <div class="showcase-section">
+        <h2>往期精彩投稿</h2>
+        <div class="showcase-grid">
+            <div class="showcase-item">
+                <img src="imgs/1.jpg" alt="单脉透翅顶色蟌">
+                <div class="showcase-content">
+                    <h3>单脉透翅顶色蟌</h3>
+                    <p>这个是搁船尖拍到的单脉透翅顶色蟌</p>
+                    <div class="showcase-author">作者：刘羽兴</div>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <img src="imgs/2.jpg" alt="顶瑕螳">
+                <div class="showcase-content">
+                    <h3>顶瑕螳</h3>
+                    <p>这是在香港大屿山伯公坳发现的顶瑕螳</p>
+                    <div class="showcase-author">作者：刘羽兴</div>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <img src="imgs/3.jpg" alt="格式透翅螳">
+                <div class="showcase-content">
+                    <h3>格式透翅螳</h3>
+                    <p>这个绿色的螳螂是在大屿山发现的格式透翅螳</p>
+                    <div class="showcase-author">作者：刘羽兴</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 2. 投稿页 ===== -->
+<div id="submit" class="page form-section">
+    <div class="form-container">
+        <h2>投稿</h2>
+        <!-- 修改为使用 Formcarry 的表单 -->
+        <form id="submission-form" 
+              action="https://formcarry.com/s/mvk0J6glhhX" 
+              method="POST"
+              enctype="multipart/form-data"
+              onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label>您的班级姓名 *</label>
+                <input type="text" name="className" required placeholder="例如：八年级2班 小明">
+            </div>
+            <div class="form-group">
+                <label>投稿生物类型 *</label>
+                <select name="bioType" required>
+                    <option value="">请选择生物类型</option>
+                    <option>植物</option>
+                    <option>昆虫</option>
+                    <option>鸟类</option>
+                    <option>动物</option>
+                    <option>水生生物</option>
+                    <option>微生物</option>
+                    <option>其他</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>生物名称 *</label>
+                <input type="text" name="bioName" required placeholder="例如：单脉透翅顶色蟌">
+            </div>
+            <div class="form-group">
+                <label>生物描述 *</label>
+                <textarea name="description" required placeholder="详细描述你观察到的生物特征、发现地点、观察时间等信息"></textarea>
+            </div>
+            <div class="form-group">
+                <label>上传图片 *</label>
+                <div class="file-upload">
+                    <input type="file" name="image" accept="image/*" required onchange="updateFileName(this)">
+                    <label class="file-upload-label">点击或拖拽图片到此处上传</label>
+                </div>
+            </div>
+            <div class="loader" id="form-loader"></div>
+            <button type="submit" class="submit-button" id="submit-button">提交投稿</button>
+            <button type="button" class="submit-button back-button" onclick="showPage('home')">返回主页</button>
+        </form>
+    </div>
+</div>
+
+<!-- ===== 3. BIEC 生物图鉴 ===== -->
+<div id="biec" class="page">
+    <div class="showcase-section">
+        <h2>BIEC 生物图鉴</h2>
+        <div class="showcase-grid" id="biec-grid"></div>
+        <div style="text-align:center;margin-top:30px">
+            <button class="cta-button" onclick="addBiecPic()">+ 添加新图片</button>
+            <input type="file" accept="image/*" id="biecFile" style="display:none" onchange="onBiecSelected(this)">
+        </div>
+    </div>
+</div>
+
+<script>
+/* ========= 页面切换 ========= */
+function showPage(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-bar button').forEach(b=>b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('nav-'+id).classList.add('active');
+    if(id==='biec') renderBiec();
+}
+
+/* ========= 投稿页原有逻辑 ========= */
+function updateFileName(inp){
+    const label=inp.nextElementSibling;
+    if(inp.files&&inp.files[0]){
+        label.textContent='已选择: '+inp.files[0].name;
+        label.style.color='#4CAF50';
+    }
+}
+
+/* ========= 表单提交处理 ========= */
+function handleSubmit(e){
+    e.preventDefault();
+    
+    // 显示加载指示器
+    const loader = document.getElementById('form-loader');
+    const submitButton = document.getElementById('submit-button');
+    loader.style.display = 'block';
+    submitButton.disabled = true;
+    submitButton.textContent = '提交中...';
+    
+    // 创建 FormData 对象
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    // 发送到 Formcarry
+    fetch(form.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            // 显示成功页面
+            document.getElementById('success-page').style.display = 'block';
+            document.getElementById('submit').style.display = 'none';
+            
+            // 重置表单
+            form.reset();
+            form.querySelector('.file-upload-label').textContent = '点击或拖拽图片到此处上传';
+            
+            // 3秒后自动返回首页
+            setTimeout(() => {
+                document.getElementById('success-page').style.display = 'none';
+                showPage('home');
+            }, 3000);
+        } else {
+            throw new Error('提交失败');
+        }
+    })
+    .catch(error => {
+        alert('提交失败，请稍后重试。错误信息: ' + error.message);
+    })
+    .finally(() => {
+        // 隐藏加载指示器
+        loader.style.display = 'none';
+        submitButton.disabled = false;
+        submitButton.textContent = '提交投稿';
+    });
+    
+    return false;
+}
+
+/* ========= BIEC 图鉴页逻辑 ========= */
+let biecPics=JSON.parse(localStorage.getItem('biecPics')||'[]');
+function addBiecPic(){document.getElementById('biecFile').click()}
+function onBiecSelected(inp){
+    if(!inp.files||!inp.files[0])return;
+    const reader=new FileReader();
+    reader.onload=function(e){
+        biecPics.push(e.target.result);
+        localStorage.setItem('biecPics',JSON.stringify(biecPics));
+        renderBiec();
+    };
+    reader.readAsDataURL(inp.files[0]);
+}
+function renderBiec(){
+    const grid=document.getElementById('biec-grid');
+    grid.innerHTML='';
+    if(biecPics.length===0){
+        grid.innerHTML='<div class="empty-tip">暂无图片，点击上方按钮添加</div>';
+        return;
+    }
+    biecPics.forEach((src,idx)=>{
+        const card=document.createElement('div');
+        card.className='showcase-item';
+        card.innerHTML=`
+            <img src="${src}" alt="图鉴" onclick="replaceBiecPic(${idx})">
+            <div class="showcase-content">
+                <h3>图片 ${idx+1}</h3>
+                <p>点击卡片可替换图片</p>
+            </div>`;
+        grid.appendChild(card);
+    });
+}
+function replaceBiecPic(idx){
+    const inp=document.createElement('input');
+    inp.type='file';inp.accept='image/*';
+    inp.onchange=function(e){
+        const file=e.target.files[0];
+        if(!file)return;
+        const reader=new FileReader();
+        reader.onload=function(ev){
+            biecPics[idx]=ev.target.result;
+            localStorage.setItem('biecPics',JSON.stringify(biecPics));
+            renderBiec();
+        };
+        reader.readAsDataURL(file);
+    };
+    inp.click();
+}
+
+/* ========= 初始化 ========= */
+showPage('home');
+</script>
+<!-- 成功页面（隐藏） -->
+<div id="success-page" style="display:none; text-align:center; padding:100px 20px;">
+    <h2 style="color:#2e7d32;">✅ 投稿成功！</h2>
+    <p>感谢您的投稿，我们会尽快审核。</p>
+    <button onclick="showPage('home')" class="cta-button">返回首页</button>
+</div>
+</body>
+</html>
